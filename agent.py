@@ -7,6 +7,8 @@ from livekit.plugins import (
     noise_cancellation,
 )
 from prompts import SYSTEM_PROMPT
+from livekit.plugins import tavus
+import os
 
 load_dotenv(".env")
 
@@ -20,7 +22,7 @@ server = AgentServer()
 async def my_agent(ctx: agents.JobContext):
     session = AgentSession(
         llm=google.realtime.RealtimeModel(
-            voice="Puck",  # Male voice (other options: Charon, Fenrir)
+            voice="Aoede",  # Male voice (other options: Charon, Fenrir)
             model="gemini-2.5-flash-native-audio-preview-09-2025"  # Free tier model!
         )
     )
@@ -33,6 +35,15 @@ async def my_agent(ctx: agents.JobContext):
                 print(f"Agent: {item.text_content}")
             elif item.role == "user" and item.text_content:
                 print(f"User: {item.text_content}")
+
+    
+    avatar = tavus.AvatarSession(
+      replica_id=os.environ.get("REPLICA_ID"),  
+      persona_id=os.environ.get("PERSONA_ID"),  
+      api_key=os.environ.get("TAVUS_API_KEY"),
+    )
+
+    await avatar.start(session, room=ctx.room)
 
     await session.start(
         room=ctx.room,
