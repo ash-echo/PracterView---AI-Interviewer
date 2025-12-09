@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LiveKitRoom, useTracks, VideoTrack, useRoomContext, RoomAudioRenderer, useIsSpeaking } from '@livekit/components-react';
+import { LiveKitRoom, useTracks, VideoTrack, useRoomContext, RoomAudioRenderer, useIsSpeaking, StartAudio } from '@livekit/components-react';
 import { Track } from 'livekit-client';
 import {
     Mic, MicOff, Video, VideoOff, PhoneOff, Loader2, Sparkles, FileText,
@@ -159,6 +159,7 @@ const InterviewRoom = () => {
 
             <RoomContent />
             <RoomAudioRenderer />
+            <StartAudio label="Click to allow audio playback" className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-indigo-600 text-white px-6 py-3 rounded-full font-bold shadow-2xl hover:bg-indigo-700 transition-colors" />
         </LiveKitRoom>
     );
 };
@@ -174,7 +175,7 @@ const ParticipantTile = ({ track, participant, isLocal }) => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.4, type: "spring", bounce: 0.2 }}
-            className={`relative w-full h-full rounded-[2rem] overflow-hidden border transition-all duration-300 isolate group ${isSpeaking
+            className={`relative w-full aspect-video rounded-[2rem] overflow-hidden border transition-all duration-300 isolate group ${isSpeaking
                 ? 'border-indigo-500/50 shadow-[0_0_50px_-10px_rgba(99,102,241,0.5)]'
                 : 'border-white/5 hover:border-white/10'
                 } bg-black/40 backdrop-blur-sm`}
@@ -320,93 +321,50 @@ const RoomContent = () => {
                 </div>
             </header>
 
-            {/* Main Stage */}
-            <div className="flex-1 flex gap-6 min-h-0 relative">
-                {/* Agent View (Main) */}
-                <div className="flex-1 relative flex items-center justify-center perspective-container">
-                    <AnimatePresence mode="wait">
-                        {agentParticipant ? (
-                            <ParticipantTile key="agent" track={agentTrack} participant={agentParticipant} isLocal={false} />
-                        ) : (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="w-full h-full max-h-[85vh] aspect-video rounded-[2rem] border border-white/5 bg-[#0a0a0f] flex flex-col items-center justify-center gap-8 relative overflow-hidden group"
-                            >
-                                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 mix-blend-overlay" />
-                                {/* Scanning Line Effect */}
-                                <div className="absolute top-0 left-0 w-full h-1 bg-indigo-500/50 blur-sm animate-[scan_3s_ease-in-out_infinite]" />
+            {/* Main Stage - Discord Grid Layout */}
+            <div className="flex-1 flex flex-col justify-center min-h-0 relative z-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full h-full max-h-[80vh]">
 
-                                <div className="relative z-10 flex flex-col items-center gap-6">
-                                    <div className="relative">
-                                        <div className="absolute inset-0 bg-indigo-500/20 blur-2xl rounded-full animate-pulse" />
-                                        <div className="w-32 h-32 rounded-full border border-white/10 bg-black/50 backdrop-blur-md flex items-center justify-center">
-                                            <Loader2 className="w-10 h-10 text-indigo-400 animate-spin" />
+                    {/* Agent View (Left/Top) */}
+                    <div className="relative w-full h-full min-h-[300px] flex items-center justify-center">
+                        <AnimatePresence mode="wait">
+                            {agentParticipant ? (
+                                <ParticipantTile key="agent" track={agentTrack} participant={agentParticipant} isLocal={false} />
+                            ) : (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="w-full max-w-4xl aspect-video rounded-[1.5rem] border border-white/5 bg-[#0a0a0f] flex flex-col items-center justify-center gap-6 relative overflow-hidden group shadow-inner"
+                                >
+                                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 mix-blend-overlay" />
+                                    <div className="relative z-10 flex flex-col items-center gap-4">
+                                        <div className="w-24 h-24 rounded-full border border-white/10 bg-black/50 backdrop-blur-md flex items-center justify-center">
+                                            <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+                                        </div>
+                                        <div className="text-center">
+                                            <h3 className="text-lg font-medium text-white">Connecting to Agent...</h3>
+                                            <p className="text-indigo-400/60 text-xs font-mono tracking-widest">ESTABLISHING UPLINK</p>
                                         </div>
                                     </div>
-                                    <div className="text-center space-y-2">
-                                        <h3 className="text-xl font-display font-medium text-white tracking-wide">ESTABLISHING CONNECTION</h3>
-                                        <p className="text-indigo-400/60 font-mono text-xs tracking-widest">WAITING FOR SYSTEM RESPONSE...</p>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
 
-                    {/* User View (Picture-in-Picture Style) */}
-                    {room.localParticipant && (
-                        <motion.div
-                            className="absolute bottom-6 right-6 w-72 aspect-video rounded-2xl overflow-hidden shadow-2xl border border-white/10 z-30 bg-black"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            drag
-                            dragConstraints={{ left: -1000, right: 0, top: -500, bottom: 0 }}
-                            whileDrag={{ scale: 1.05, cursor: "grabbing" }}
-                        >
+                    {/* User View (Right/Bottom) */}
+                    <div className="relative w-full h-full min-h-[300px] flex items-center justify-center">
+                        {room.localParticipant ? (
                             <ParticipantTile track={localTrack} participant={room.localParticipant} isLocal={true} />
-                        </motion.div>
-                    )}
+                        ) : (
+                            <div className="w-full max-w-4xl aspect-video rounded-[1.5rem] bg-[#0a0a0f] border border-white/5 flex items-center justify-center text-gray-500">
+                                <Loader2 className="w-8 h-8 animate-spin" />
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                {/* Sliding Assets Panel */}
-                <AnimatePresence>
-                    {showAssets && (
-                        <motion.div
-                            initial={{ x: 400, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            exit={{ x: 400, opacity: 0 }}
-                            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                            className="w-[400px] h-full glass-panel rounded-3xl border border-white/10 p-6 flex flex-col gap-6"
-                        >
-                            <div className="flex items-center justify-between pb-4 border-b border-white/5">
-                                <h3 className="font-display font-bold text-lg flex items-center gap-2 text-white">
-                                    <FileText className="w-5 h-5 text-indigo-400" />
-                                    CONTEXT INJECTION
-                                </h3>
-                                <button onClick={() => setShowAssets(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors text-muted hover:text-white">✕</button>
-                            </div>
 
-                            <div className="flex-1 overflow-y-auto space-y-8 pr-2 custom-scrollbar">
-                                <section>
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <div className="w-1 h-4 bg-indigo-500 rounded-full" />
-                                        <h4 className="text-xs font-bold text-muted uppercase tracking-wider">Resume Data</h4>
-                                    </div>
-                                    <ResumeUploader />
-                                </section>
-
-                                <section>
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <div className="w-1 h-4 bg-purple-500 rounded-full" />
-                                        <h4 className="text-xs font-bold text-muted uppercase tracking-wider">Codebase Context</h4>
-                                    </div>
-                                    <GithubInput />
-                                </section>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
             </div>
 
             {/* Float Dock Controls */}
@@ -449,6 +407,75 @@ const RoomContent = () => {
                     </motion.button>
                 </motion.div>
             </div>
+            {/* Assets Panel Overlay */}
+            <AnimatePresence>
+                {showAssets && (
+                    <>
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowAssets(false)}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-md z-40"
+                        />
+
+                        {/* Panel */}
+                        <motion.div
+                            initial={{ x: "100%", opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            exit={{ x: "100%", opacity: 0 }}
+                            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                            className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[#0a0a0f] border-l border-white/10 p-8 flex flex-col gap-6 z-50 shadow-2xl"
+                        >
+                            <div className="flex items-center justify-between pb-6 border-b border-white/5">
+                                <h3 className="font-display font-bold text-xl flex items-center gap-3 text-white">
+                                    <div className="p-2 rounded-lg bg-indigo-500/20">
+                                        <FileText className="w-5 h-5 text-indigo-400" />
+                                    </div>
+                                    Context Assets
+                                </h3>
+                                <button
+                                    onClick={() => setShowAssets(false)}
+                                    className="p-2 rounded-full hover:bg-white/10 transition-colors text-gray-400 hover:text-white"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto space-y-10 pr-2 custom-scrollbar">
+                                <section>
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-1.5 h-6 bg-indigo-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.5)]" />
+                                        <div>
+                                            <h4 className="text-sm font-bold text-white tracking-wide uppercase">Resume Data</h4>
+                                            <p className="text-xs text-gray-500 mt-0.5">Upload PDF for AI analysis</p>
+                                        </div>
+                                    </div>
+                                    <ResumeUploader />
+                                </section>
+
+                                <section>
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-1.5 h-6 bg-purple-600 rounded-full shadow-[0_0_10px_rgba(147,51,234,0.5)]" />
+                                        <div>
+                                            <h4 className="text-sm font-bold text-white tracking-wide uppercase">GitHub Profile</h4>
+                                            <p className="text-xs text-gray-500 mt-0.5">Link repositories for technical context</p>
+                                        </div>
+                                    </div>
+                                    <GithubInput />
+                                </section>
+                            </div>
+
+                            <div className="pt-6 border-t border-white/5">
+                                <p className="text-xs text-center text-gray-600">
+                                    Uploaded assets are processed securely in real-time.
+                                </p>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
