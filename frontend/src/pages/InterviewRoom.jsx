@@ -13,7 +13,8 @@ import ResumeUploader from '../components/ResumeUploader';
 import GithubInput from '../components/GithubInput';
 import ParticleBackground from '../components/ParticleBackground';
 
-const SERVER_URL = 'wss://practerview-qgcp05tt.livekit.cloud';
+// LiveKit server URL is now fetched from token server response
+
 
 const InterviewRoom = () => {
     const [token, setToken] = useState("");
@@ -37,6 +38,7 @@ const InterviewRoom = () => {
 
     const [currentStep, setCurrentStep] = useState(0);
     const [tokenReady, setTokenReady] = useState(null);
+    const [serverUrl, setServerUrl] = useState("");
 
     // 1. Fetch Token Immediately (Background)
     useEffect(() => {
@@ -48,6 +50,7 @@ const InterviewRoom = () => {
                 const response = await fetch(`http://localhost:3000/getToken?type=${type || 'default'}`);
                 const data = await response.json();
                 setTokenReady(data.token);
+                setServerUrl(data.url);  // Get server URL from response
             } catch (error) {
                 console.error("Failed to fetch token:", error);
             }
@@ -146,7 +149,7 @@ const InterviewRoom = () => {
             video={true}
             audio={true}
             token={token}
-            serverUrl={SERVER_URL}
+            serverUrl={serverUrl}
             data-lk-theme="default"
             className="h-screen w-full bg-[#030014] overflow-hidden relative font-sans"
             onDisconnected={() => navigate('/')}

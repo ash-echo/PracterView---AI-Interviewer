@@ -74,6 +74,9 @@ class TokenHandler(BaseHTTPRequestHandler):
                     "type": interview_type,
                     "room": room_name
                 }
+                
+                print(f"[TOKEN_SERVER] Returning URL: {LIVEKIT_URL}")
+                print(f"[TOKEN_SERVER] Room: {room_name}")
                 self.wfile.write(json.dumps(response).encode())
             except Exception as e:
                 print(f"Error generating token: {str(e)}")
