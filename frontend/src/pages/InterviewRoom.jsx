@@ -174,7 +174,7 @@ const InterviewRoom = () => {
     );
 };
 
-// ... keep existing subcomponents ...
+
 const ParticipantTile = ({ track, participant, isLocal }) => {
     const isSpeaking = useIsSpeaking(participant);
 
