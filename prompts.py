@@ -62,6 +62,16 @@ DOCUMENT_SEGMENT = """
 - Proceed to specific technical questions defined in the ROLE CONTEXT below.
 - Ask exactly 5 questions.
 - Mix Theoretical (Medium) and Scenario-based (Hard) questions.
+
+## STEP 5: WRAP UP
+- After all technical questions are answered, say: "That concludes the technical portion. Would you like to receive your performance feedback?"
+- **IF THEY SAY YES**:
+    - Provide a brief ORAL summary of their performance.
+    - Mention 2 strengths you observed.
+    - Mention 1-2 areas they could improve.
+    - End with: "Thank you for your time. Best of luck!"
+- **IF THEY SAY NO**:
+    - Say: "Understood. Thank you for joining the interview today. You may disconnect now. Best of luck!"
 """
 
 # -------------------------------------------------------------------------
@@ -79,6 +89,16 @@ DIRECT_SEGMENT = """
 - After their introduction, acknowledge it briefly.
 - Move STRAIGHT into the first question/challenge.
 - DO NOT ask for Resume or GitHub.
+
+## STEP 3: WRAP UP
+- After all questions/challenges are complete, say: "That concludes this session. Would you like to hear your performance feedback?"
+- **IF THEY SAY YES**:
+    - Provide a brief ORAL summary of their performance.
+    - Highlight what they did well.
+    - Suggest 1-2 areas for improvement.
+    - End with: "Thank you for your time. Best of luck!"
+- **IF THEY SAY NO**:
+    - Say: "No problem. Thank you for joining today. You may disconnect now. Best of luck!"
 """
 
 # -------------------------------------------------------------------------
