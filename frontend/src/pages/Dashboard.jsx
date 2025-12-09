@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Code, Layers, Smartphone, Layout, User, Sparkles, ArrowRight, Trophy,
-    Zap, Terminal, Cpu, GitBranch, Command, Activity, Radio
+    Zap, Terminal, Cpu, GitBranch, Command, Activity, Radio, Binary
 } from 'lucide-react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import ParticleBackground from '../components/ParticleBackground';
@@ -144,6 +144,16 @@ const Dashboard = () => {
             color: "text-indigo-400",
             delay: 0.7,
             colSpan: "md:col-span-3 lg:col-span-1"
+        },
+        {
+            id: 'dsa',
+            title: 'Data Structures & Algo',
+            icon: <Binary className="w-6 h-6" />,
+            description: "Arrays, Trees, Graphs & Optimization.",
+            tech: ['Big O', 'LeetCode'],
+            color: "text-cyan-400",
+            delay: 0.8,
+            colSpan: "md:col-span-2 lg:col-span-1"
         }
     ];
 

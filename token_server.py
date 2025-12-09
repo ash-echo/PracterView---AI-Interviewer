@@ -26,6 +26,16 @@ class TokenHandler(BaseHTTPRequestHandler):
                 query_components = parse_qs(urlparse(self.path).query)
                 interview_type = query_components.get('type', ['default'])[0]
 
+                # Validate interview type
+                VALID_TYPES = [
+                    "frontend", "backend", "fullstack", "devops", 
+                    "aiml", "dsa", "hr", "hackathon", "general", "default"
+                ]
+                
+                if interview_type not in VALID_TYPES:
+                    print(f"[TOKEN_SERVER] Invalid type '{interview_type}', defaulting to 'default'")
+                    interview_type = "default"
+
                 
                 token = api.AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET)
                 
