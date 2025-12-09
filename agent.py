@@ -153,6 +153,92 @@ Acknowledge that you received their resume and ask a specific question about som
 
 Acknowledge that you reviewed their GitHub and ask about a specific repository or project mentioned. Be specific - reference actual repos or technologies from the data."""
                 ))
+            
+            elif data_type == "CODE_FEEDBACK":
+                print(f"[AGENT] Speaking code feedback to candidate...")
+                feedback_data = payload.get("feedback", {})
+                score = feedback_data.get("score", 0)
+                verdict = feedback_data.get("verdict", "Unknown")
+                summary = feedback_data.get("summary", "")
+                suggestions = feedback_data.get("suggestions", [])
+                
+                # Build the feedback speech
+                suggestions_text = ""
+                if suggestions:
+                    suggestions_text = "Here are my suggestions for improvement: " + ". ".join(suggestions[:3])
+                
+                asyncio.create_task(session.generate_reply(
+                    instructions=f"""You just reviewed the candidate's code submission. Speak naturally as if you're giving verbal feedback.
+
+CODE EVALUATION RESULTS:
+- Overall Score: {score} out of 100
+- Verdict: {verdict}
+- Summary: {summary}
+{f'- Suggestions: {suggestions_text}' if suggestions_text else ''}
+
+INSTRUCTIONS FOR YOUR RESPONSE:
+1. Start by acknowledging their submission
+2. Tell them their score and verdict in a conversational way
+3. Explain the main feedback points briefly (don't read word for word, paraphrase naturally)
+4. If score is low (below 30), be encouraging but honest about what needs work
+5. If score is medium (30-70), highlight what they did well and what to improve
+6. If score is high (70+), congratulate them and mention minor improvements
+7. End by asking if they want to try again or move to the next question
+8. Keep your response under 30 seconds of speaking time - be concise!"""
+                ))
+            
+            elif data_type == "PHASE_CHANGE":
+                phase = payload.get("phase", "")
+                questions_required = payload.get("questionsRequired", 0)
+                print(f"[AGENT] Phase changed to: {phase}, Questions: {questions_required}")
+                
+                # More direct, action-oriented instructions that trigger immediate response
+                phase_instructions = {
+                    "introduction": """START SPEAKING NOW. Welcome the candidate warmly to the interview. 
+Say: "Hello and welcome! I'm excited to be your interviewer today. Let me quickly explain how this will work. We'll start with some questions about your resume and experience, then discuss your GitHub projects, followed by some technical questions, and finish with a coding challenge. Are you ready to begin?"
+Wait for their response.""",
+
+                    "resume": f"""START SPEAKING NOW. Transition to the Resume Round.
+Say: "Great! Let's move to the Resume Round. I'd like to learn more about your experience."
+Then immediately ask your FIRST question about their work experience, education, or a specific technology they've used.
+You must ask exactly {questions_required} questions in this round. After each answer, ask the next question.
+Be conversational and engage with their responses.""",
+
+                    "github": f"""START SPEAKING NOW. Transition to the GitHub Round.
+Say: "Excellent! Now let's talk about your GitHub projects and coding work."
+Then immediately ask your FIRST question about their repositories, open source contributions, or coding projects.
+You must ask exactly {questions_required} questions in this round.
+Focus on technical decisions, challenges they faced, or interesting features they built.""",
+
+                    "topic": f"""START SPEAKING NOW. Transition to the Topic Questions Round.
+Say: "Great work so far! Now let's dive into some technical questions."
+Then immediately ask your FIRST technical question relevant to the interview type (frontend, backend, etc.).
+You must ask exactly {questions_required} technical questions.
+These should test their knowledge depth. Ask follow-up questions based on their answers.""",
+
+                    "coding": """START SPEAKING NOW. Announce the Coding Round.
+Say: "Alright! Time for the coding challenge. Please click the IDE button at the top of your screen to open the code editor. You'll see a coding problem there. Take your time to write your solution, and when you're ready, click 'Run Code' to submit it for evaluation. I'll review your solution once you're done. Good luck!"
+Wait for them to work on the problem.""",
+
+                    "report": """START SPEAKING NOW. Conclude the interview.
+Say: "That concludes our interview! Thank you so much for your time today. You did great! Would you like me to give you a quick summary of how you performed, including your strengths and areas for improvement?"
+Wait for their response, then provide constructive feedback if they say yes."""
+                }
+                
+                instruction = phase_instructions.get(phase, "Continue the interview. Ask the candidate a relevant question now.")
+                print(f"[AGENT] Sending phase instruction for: {phase}")
+                asyncio.create_task(session.generate_reply(instructions=instruction))
+                
+            elif data_type == "INTERVIEW_SKIPPED":
+                print(f"[AGENT] Interview skipped by candidate")
+                asyncio.create_task(session.generate_reply(
+                    instructions="""The candidate has chosen to skip to the final report. 
+                    
+Acknowledge this choice politely but note that skipping sections will result in a score of 0. 
+Say something like: "I see you've chosen to skip ahead. That's completely fine - I'll prepare your report now. Do keep in mind that skipped sections won't be scored. Thank you for your time today!"
+
+Keep it brief and non-judgmental."""
+                ))
                 
         except Exception as e:
             print(f"[AGENT] Error processing received data: {e}")
