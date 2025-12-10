@@ -28,12 +28,27 @@ const GithubInput = () => {
         setError('');
 
         try {
-            // Fetch public repos
-            const response = await fetch(`https://api.github.com/users/${cleanUsername}/repos?per_page=10&sort=updated`);
+            // Fetch public repos with authentication for higher rate limit
+            const headers = {
+                'Accept': 'application/vnd.github.v3+json'
+            };
+            
+            // Add token if available
+            if (import.meta.env.VITE_GITHUB_TOKEN) {
+                headers['Authorization'] = `token ${import.meta.env.VITE_GITHUB_TOKEN}`;
+            }
+            
+            const response = await fetch(
+                `https://api.github.com/users/${cleanUsername}/repos?per_page=10&sort=updated`,
+                { headers }
+            );
 
             if (!response.ok) {
                 if (response.status === 404) {
                     throw new Error('User not found');
+                }
+                if (response.status === 403) {
+                    throw new Error('GitHub API rate limit exceeded. Please try again later or use authentication.');
                 }
                 throw new Error('Failed to fetch data');
             }

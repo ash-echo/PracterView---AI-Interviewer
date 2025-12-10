@@ -791,31 +791,6 @@ function solution() {
                 </motion.div>
             </div>
 
-            {/* Skip & Next Phase Buttons */}
-            {interviewPhase !== 'report' && (
-                <>
-                    <motion.button
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        onClick={handleSkipInterview}
-                        className="fixed bottom-6 right-6 px-5 py-3 bg-yellow-600/90 hover:bg-yellow-500 text-white rounded-lg text-sm font-medium flex items-center gap-2 shadow-lg z-50"
-                    >
-                        ⏭️ Skip to Report
-                    </motion.button>
-
-                    {interviewPhase !== 'coding' && (
-                        <motion.button
-                            initial={{ opacity: 0, x: 50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            onClick={advancePhase}
-                            className="fixed bottom-6 right-48 px-5 py-3 bg-blue-600/90 hover:bg-blue-500 text-white rounded-lg text-sm font-medium flex items-center gap-2 shadow-lg z-50"
-                        >
-                            ➡️ Next Phase
-                        </motion.button>
-                    )}
-                </>
-            )}
-
             {/* Final Report Panel */}
             <AnimatePresence>
                 {interviewPhase === 'report' && (
